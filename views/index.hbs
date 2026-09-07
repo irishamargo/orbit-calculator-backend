@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{{title}}</title>
+
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<div class="phone">
+
+  <main class="feed-page">
+
+    <section class="feed-card">
+
+      <!-- Видео -->
+      <video
+        class="feed-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="{{calculation.image}}"
+      >
+        <source src="{{calculation.video}}" type="video/mp4">
+      </video>
+
+      <!-- Затемнение -->
+      <div class="feed-overlay"></div>
+
+      <!-- Информация -->
+      <div class="feed-content">
+
+        <div class="feed-info">
+            <h1>{{calculation.name}}</h1>
+
+            <p>{{calculation.orbitType}}</p>
+            <p>Масса: <strong>{{calculation.mass}} кг</strong></p>
+            <p>Высота: <strong>{{calculation.height}} км</strong></p>
+
+            <button
+                id="moreButton"
+                class="more-button"
+                onclick="toggleDetails()"
+                >
+                Ещё ↓
+            </button>
+
+            <div id="details" class="feed-details">
+            <p>
+                Скорость: <strong>{{calculation.velocity}} км/с</strong>
+            </p>
+            <p>
+                Период обращения: <strong>{{calculation.period}} мин</strong>
+            </p>
+            </div>
+        </div>
+
+        <div class="feed-actions">
+
+            <div class="likes">
+            <span class="heart">♡</span>
+            <span class="like-count">{{calculation.likes}}</span>
+            </div>
+
+            <a
+            href="/?id={{nextCalculation.id}}"
+            class="next-button"
+            >
+            Следующий →
+            </a>
+
+        </div>
+
+        </div>
+
+    </section>
+
+  </main>
+
+  {{> navigation isHome=true}}
+
+</div>
+
+<script src="/js/main.js"></script>
+
+</body>
+
+</html>

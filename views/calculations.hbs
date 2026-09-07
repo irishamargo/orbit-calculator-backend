@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<div class="phone">
+
+  <main class="page calculations-page">
+
+    <h1>Все расчеты</h1>
+
+    <form method="GET" action="/calculations">
+
+      <select
+        name="type"
+        class="filter"
+        onchange="this.form.submit()"
+      >
+
+        <option value="ALL" {{#if (eq selectedType "ALL")}}selected{{/if}}>
+          Все типы орбит
+        </option>
+
+        <option value="LEO" {{#if (eq selectedType "LEO")}}selected{{/if}}>
+          Низкая околоземная
+        </option>
+
+        <option value="GEO" {{#if (eq selectedType "GEO")}}selected{{/if}}>
+          Геостационарная
+        </option>
+
+        <option value="SSO" {{#if (eq selectedType "SSO")}}selected{{/if}}>
+          Солнечно-синхронная
+        </option>
+
+      </select>
+
+    </form>
+
+    <div class="cards-grid">
+
+      {{#each calculations}}
+
+        <a
+          href="/?id={{this.id}}"
+          class="calculation-card"
+          aria-label="Открыть {{this.name}} в ленте"
+        >
+
+          <img
+            src="{{this.image}}"
+            alt="{{this.name}}"
+          >
+
+          <div class="card-content">
+
+            <h2>{{this.name}}</h2>
+
+            <p>{{this.orbitType}}</p>
+
+            <p>Масса: {{this.mass}} кг</p>
+
+            <div class="card-footer">
+
+              <span>♡ {{this.likes}}</span>
+
+              <span class="status {{#if this.isDraft}}status-draft{{/if}}">
+                {{this.status}}
+              </span>
+
+            </div>
+
+          </div>
+
+        </a>
+
+      {{/each}}
+
+    </div>
+
+  </main>
+
+  {{> navigation isCalculations=true}}
+
+</div>
+
+</body>
+
+</html>

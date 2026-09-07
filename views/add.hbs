@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<div class="phone">
+
+  <main class="page">
+
+    <h1>Добавление расчета</h1>
+
+    {{#if success}}
+
+      <div class="success-message">
+        Расчёт успешно создан
+      </div>
+
+      <div class="result-card">
+
+        <h2>{{calculation.name}}</h2>
+
+        <p>
+          Тип орбиты:
+          <strong>{{calculation.orbitType}}</strong>
+        </p>
+
+        <p>
+          Масса:
+          <strong>{{calculation.mass}} кг</strong>
+        </p>
+
+        <p>
+          Высота:
+          <strong>{{calculation.height}} км</strong>
+        </p>
+
+        <p>
+          Скорость:
+          <strong>{{calculation.velocity}} км/с</strong>
+        </p>
+
+        <p>
+          Период:
+          <strong>{{calculation.period}} мин</strong>
+        </p>
+
+      </div>
+
+    {{else}}
+
+      <p class="draft">черновик</p>
+
+      <form action="/add" method="POST" onsubmit="return false;">
+
+        <label for="name">
+          Название спутника
+        </label>
+
+        <input
+          id="name"
+          name="name"
+          type="text"
+          placeholder="Например, Sfera"
+          value="{{draftCalculation.name}}"
+          required
+        >
+
+        <label for="orbitType">
+          Тип орбиты
+        </label>
+
+        <select id="orbitType" name="orbitType">
+
+          <option value="LEO" {{#if (eq draftCalculation.orbitCode "LEO")}}selected{{/if}}>
+            Низкая околоземная
+          </option>
+
+          <option value="GEO" {{#if (eq draftCalculation.orbitCode "GEO")}}selected{{/if}}>
+            Геостационарная
+          </option>
+
+          <option value="SSO" {{#if (eq draftCalculation.orbitCode "SSO")}}selected{{/if}}>
+            Солнечно-синхронная
+          </option>
+
+        </select>
+
+        <label for="mass">
+          Масса
+        </label>
+
+        <div class="input-with-unit">
+
+          <input
+            id="mass"
+            name="mass"
+            type="number"
+            placeholder="750"
+            value="{{draftCalculation.mass}}"
+            min="0"
+            required
+          >
+
+          <span>кг</span>
+
+        </div>
+
+        <label>
+          Фото
+        </label>
+
+        <div
+          class="upload-box photo-preview"
+          style="background-image: url('{{draftCalculation.image}}')"
+          aria-label="Фото {{draftCalculation.name}}"
+        >
+        </div>
+
+        <label>
+          Видео
+        </label>
+
+        <div class="upload-box video-box">
+          <span>+</span>
+        </div>
+
+        <button type="button" class="primary-button add-button" aria-disabled="true">
+          Добавить
+        </button>
+
+      </form>
+
+    {{/if}}
+
+  </main>
+
+  {{> navigation isAdd=true}}
+
+</div>
+
+</body>
+
+</html>
