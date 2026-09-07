@@ -237,9 +237,19 @@ body {
 
   align-items: center;
 
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: inherit;
+
   font-size: 20px;
 
   line-height: 1;
+
+  cursor: pointer;
 }
 
 .heart {
@@ -247,6 +257,16 @@ body {
   line-height: 1;
 
   margin-bottom: 4px;
+
+  transition:
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.likes.liked .heart {
+  color: #6536F1;
+
+  transform: scale(1.08);
 }
 
 .like-count {

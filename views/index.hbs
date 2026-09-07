@@ -63,10 +63,16 @@
 
         <div class="feed-actions">
 
-            <div class="likes">
+            <button
+            type="button"
+            class="likes"
+            data-like-button
+            aria-pressed="false"
+            aria-label="Поставить лайк"
+            >
             <span class="heart">♡</span>
             <span class="like-count">{{calculation.likes}}</span>
-            </div>
+            </button>
 
             <a
             href="/?id={{nextCalculation.id}}"

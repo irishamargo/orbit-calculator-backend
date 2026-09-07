@@ -10,3 +10,19 @@ function toggleDetails() {
     button.textContent = 'Скрыть ↑';
   }
 }
+
+const likeButton = document.querySelector('[data-like-button]');
+
+if (likeButton) {
+  const heart = likeButton.querySelector('.heart');
+  const likeCount = likeButton.querySelector('.like-count');
+  const initialCount = Number(likeCount.textContent) || 0;
+
+  likeButton.addEventListener('click', () => {
+    const isLiked = likeButton.classList.toggle('liked');
+
+    heart.textContent = isLiked ? '♥' : '♡';
+    likeCount.textContent = String(initialCount + (isLiked ? 1 : 0));
+    likeButton.setAttribute('aria-pressed', String(isLiked));
+  });
+}

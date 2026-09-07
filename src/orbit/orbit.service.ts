@@ -27,8 +27,8 @@ export class OrbitService {
         height: 400,
         velocity: 7.67,
         period: 92.4,
-        image: '/images/astra-1.png',
-        video: '/videos/astra-1.mp4',
+        image: 'http://localhost:9000/orbit-media/image/astra-1.png',
+        video: 'http://localhost:9000/orbit-media/videos/astra-1.mp4',
         likes: 128,
         status: 'Опубликован',
     },
@@ -41,8 +41,8 @@ export class OrbitService {
         height: 800,
         velocity: 7.46,
         period: 100.9,
-        image: '/images/meteor-2.png',
-        video: '/videos/meteor-2.mp4',
+        image: 'http://localhost:9000/orbit-media/image/meteor-2.png',
+        video: 'http://localhost:9000/orbit-media/videos/meteor-2.mp4',
         likes: 35,
         status: 'Опубликован',
     },
@@ -55,8 +55,8 @@ export class OrbitService {
         height: 35786,
         velocity: 3.07,
         period: 1436,
-        image: '/images/geosat-1.png',
-        video: '/videos/geosat-1.mp4',
+        image: 'http://localhost:9000/orbit-media/image/geosat-1.png',
+        video: 'http://localhost:9000/orbit-media/videos/geosat-1.mp4',
         likes: 96,
         status: 'Опубликован',
     },
@@ -69,16 +69,14 @@ export class OrbitService {
         height: 600,
         velocity: 7.56,
         period: 96.7,
-        image: '/images/sfera.png',
-        video: '/videos/sfera.mp4',
+        image: 'http://localhost:9000/orbit-media/image/sfera.png',
+        video: 'http://localhost:9000/orbit-media/videos/sfera.mp4',
         likes: 0,
         status: 'Черновик',
     },
   ];
 
-  /**
-   * Получение всех расчётов
-   */
+  /*Получение всех расчётов*/
   getAll(): OrbitCalculation[] {
     return this.calculations;
   }
@@ -90,9 +88,7 @@ export class OrbitService {
     );
   }
 
-  /**
-   * Фильтрация по типу орбиты
-   */
+  /* Фильтрация по типу орбиты */
   getByType(type?: string): OrbitCalculation[] {
     if (!type || type === 'ALL') {
       return this.calculations;
@@ -103,9 +99,7 @@ export class OrbitService {
     );
   }
 
-  /**
-   * Расчёт параметров орбиты
-   */
+  /*Расчёт параметров орбиты*/
   calculate(
     name: string,
     mass: number,
