@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Query,
   Render,
 } from '@nestjs/common';
@@ -52,18 +51,6 @@ export class OrbitController {
   @Get('add')
   @Render('add')
   getAddPage() {
-    const draftCalculation = this.orbitService.getDraft();
-
-    return {
-      title: 'Добавление расчёта',
-      draftCalculation,
-    };
-  }
-
-  // Визуальный экран добавления без сохранения изменений
-  @Post('add')
-  @Render('add')
-  addCalculation() {
     const draftCalculation = this.orbitService.getDraft();
 
     return {
