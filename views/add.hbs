@@ -15,130 +15,87 @@
 
   <main class="page">
 
-    <h1>Добавление расчета</h1>
+    <h1>Добавление расчёта</h1>
 
-    {{#if success}}
+    <p class="draft">черновик</p>
 
-      <div class="success-message">
-        Расчёт успешно создан
-      </div>
+    <form>
 
-      <div class="result-card">
+      <label for="name">
+        Название спутника
+      </label>
 
-        <h2>{{calculation.name}}</h2>
+      <input
+        id="name"
+        name="name"
+        type="text"
+        placeholder="Например, Sfera"
+        value="{{draftCalculation.name}}"
+      >
 
-        <p>
-          Тип орбиты:
-          <strong>{{calculation.orbitType}}</strong>
-        </p>
+      <label for="orbitType">
+        Тип орбиты
+      </label>
 
-        <p>
-          Масса:
-          <strong>{{calculation.mass}} кг</strong>
-        </p>
+      <select id="orbitType" name="orbitType">
 
-        <p>
-          Высота:
-          <strong>{{calculation.height}} км</strong>
-        </p>
+        <option value="LEO">
+          Низкая околоземная
+        </option>
 
-        <p>
-          Скорость:
-          <strong>{{calculation.velocity}} км/с</strong>
-        </p>
+        <option value="GEO">
+          Геостационарная
+        </option>
 
-        <p>
-          Период:
-          <strong>{{calculation.period}} мин</strong>
-        </p>
+        <option value="SSO" selected>
+          Солнечно-синхронная
+        </option>
 
-      </div>
+      </select>
 
-    {{else}}
+      <label for="mass">
+        Масса
+      </label>
 
-      <p class="draft">черновик</p>
-
-      <form action="/add" method="POST" onsubmit="return false;">
-
-        <label for="name">
-          Название спутника
-        </label>
+      <div class="input-with-unit">
 
         <input
-          id="name"
-          name="name"
-          type="text"
-          placeholder="Например, Sfera"
-          value="{{draftCalculation.name}}"
-          required
+          id="mass"
+          name="mass"
+          type="number"
+          placeholder="750"
+          value="{{draftCalculation.mass}}"
+          min="0"
         >
 
-        <label for="orbitType">
-          Тип орбиты
-        </label>
+        <span>кг</span>
 
-        <select id="orbitType" name="orbitType">
+      </div>
 
-          <option value="LEO" {{#if (eq draftCalculation.orbitCode "LEO")}}selected{{/if}}>
-            Низкая околоземная
-          </option>
+      <label>
+        Фото
+      </label>
 
-          <option value="GEO" {{#if (eq draftCalculation.orbitCode "GEO")}}selected{{/if}}>
-            Геостационарная
-          </option>
+      <div
+        class="upload-box photo-preview"
+        style="background-image: url('{{draftCalculation.image}}')"
+        aria-label="Фото {{draftCalculation.name}}"
+      >
+      </div>
 
-          <option value="SSO" {{#if (eq draftCalculation.orbitCode "SSO")}}selected{{/if}}>
-            Солнечно-синхронная
-          </option>
+      <label>
+        Видео
+      </label>
 
-        </select>
+      <div class="upload-box video-box">
+        <span>+</span>
+      </div>
 
-        <label for="mass">
-          Масса
-        </label>
+      <button type="button" class="primary-button add-button">
+        Добавить
+      </button>
 
-        <div class="input-with-unit">
-
-          <input
-            id="mass"
-            name="mass"
-            type="number"
-            placeholder="750"
-            value="{{draftCalculation.mass}}"
-            min="0"
-            required
-          >
-
-          <span>кг</span>
-
-        </div>
-
-        <label>
-          Фото
-        </label>
-
-        <div
-          class="upload-box photo-preview"
-          style="background-image: url('{{draftCalculation.image}}')"
-          aria-label="Фото {{draftCalculation.name}}"
-        >
-        </div>
-
-        <label>
-          Видео
-        </label>
-
-        <div class="upload-box video-box">
-          <span>+</span>
-        </div>
-
-        <button type="button" class="primary-button add-button" aria-disabled="true">
-          Добавить
-        </button>
-
-      </form>
-
-    {{/if}}
+    </form>
 
   </main>
 
