@@ -1,7 +1,9 @@
 import {
   Controller,
   Get,
+  Post,
   Query,
+  Redirect,
   Render,
 } from '@nestjs/common';
 
@@ -46,6 +48,17 @@ export class OrbitController {
         nextCalculation,
     };
     }
+
+  // Лайк
+  @Post('like')
+  @Redirect('/', 303)
+  toggleLike(@Query('id') id?: string) {
+    const calculation = this.orbitService.toggleLike(Number(id));
+
+    return {
+      url: calculation ? `/?id=${calculation.id}` : '/',
+    };
+  }
 
   // Страница добавления
   @Get('add')

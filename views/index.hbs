@@ -43,36 +43,36 @@
             <p>Масса: <strong>{{calculation.mass}} кг</strong></p>
             <p>Высота: <strong>{{calculation.height}} км</strong></p>
 
-            <button
-                id="moreButton"
-                class="more-button"
-                onclick="toggleDetails()"
-                >
-                Ещё ↓
-            </button>
+            <details class="feed-details">
+              <summary class="more-button">
+                <span class="details-more">Ещё ↓</span>
+                <span class="details-less">Скрыть ↑</span>
+              </summary>
 
-            <div id="details" class="feed-details">
-            <p>
-                Скорость: <strong>{{calculation.velocity}} км/с</strong>
-            </p>
-            <p>
-                Период обращения: <strong>{{calculation.period}} мин</strong>
-            </p>
-            </div>
+              <div class="feed-details-body">
+                <p>
+                    Скорость: <strong>{{calculation.velocity}} км/с</strong>
+                </p>
+                <p>
+                    Период обращения: <strong>{{calculation.period}} мин</strong>
+                </p>
+              </div>
+            </details>
         </div>
 
         <div class="feed-actions">
 
-            <button
-            type="button"
-            class="likes"
-            data-like-button
-            aria-pressed="false"
-            aria-label="Поставить лайк"
-            >
-            <span class="heart">♡</span>
-            <span class="like-count">{{calculation.likes}}</span>
-            </button>
+            <form class="like-form" action="/like?id={{calculation.id}}" method="POST">
+              <button
+              type="submit"
+              class="likes {{#if calculation.liked}}liked{{/if}}"
+              aria-pressed="{{calculation.liked}}"
+              aria-label="Поставить лайк"
+              >
+              <span class="heart">{{#if calculation.liked}}♥{{else}}♡{{/if}}</span>
+              <span class="like-count">{{calculation.likes}}</span>
+              </button>
+            </form>
 
             <a
             href="/?id={{nextCalculation.id}}"
@@ -92,8 +92,6 @@
   {{> navigation isHome=true}}
 
 </div>
-
-<script src="/js/main.js"></script>
 
 </body>
 

@@ -12,6 +12,7 @@ export interface OrbitCalculation {
   image: string;
   video: string;
   likes: number;
+  liked: boolean;
   status: 'Опубликован' | 'Черновик';
 }
 
@@ -30,6 +31,7 @@ export class OrbitService {
       image: 'http://localhost:9000/orbit-media/image/astra-1.png',
       video: 'http://localhost:9000/orbit-media/videos/astra-1.mp4',
       likes: 128,
+      liked: false,
       status: 'Опубликован',
     },
     {
@@ -44,6 +46,7 @@ export class OrbitService {
       image: 'http://localhost:9000/orbit-media/image/meteor-2.png',
       video: 'http://localhost:9000/orbit-media/videos/meteor-2.mp4',
       likes: 35,
+      liked: false,
       status: 'Опубликован',
     },
     {
@@ -58,6 +61,7 @@ export class OrbitService {
       image: 'http://localhost:9000/orbit-media/image/geosat-1.png',
       video: 'http://localhost:9000/orbit-media/videos/geosat-1.mp4',
       likes: 96,
+      liked: false,
       status: 'Опубликован',
     },
     {
@@ -72,6 +76,7 @@ export class OrbitService {
       image: 'http://localhost:9000/orbit-media/image/sfera.png',
       video: 'http://localhost:9000/orbit-media/videos/sfera.mp4',
       likes: 0,
+      liked: false,
       status: 'Черновик',
     },
   ];
@@ -88,6 +93,22 @@ export class OrbitService {
         (calculation) => calculation.status === 'Черновик',
       ) ?? this.calculations[0]
     );
+  }
+
+  /* Переключение лайка */
+  toggleLike(id: number): OrbitCalculation | undefined {
+    const calculation = this.calculations.find(
+      (item) => item.id === id,
+    );
+
+    if (!calculation) {
+      return undefined;
+    }
+
+    calculation.liked = !calculation.liked;
+    calculation.likes += calculation.liked ? 1 : -1;
+
+    return calculation;
   }
 
   /* Фильтрация по типу орбиты */
