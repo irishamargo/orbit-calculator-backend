@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { OrbitModule } from './orbit/orbit.module.js';
+import { OrbitTypeModule } from './orbit-type/orbit-type.module.js';
 
 @Module({
-  imports: [OrbitModule],
+  imports: [OrbitTypeModule],
 })
 export class AppModule {}

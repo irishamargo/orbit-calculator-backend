@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<div class="phone">
+  <main class="page orbit-add-page">
+    <h1>Добавление типа орбиты</h1>
+    <p class="draft">черновик</p>
+
+    <form class="orbit-form" autocomplete="off">
+      <label class="upload-field" for="orbit-type-image-file">
+        <span class="field-label">Фото</span>
+        <span class="upload-box photo-upload">
+          <img src="{{draftOrbitType.image}}" alt="Фото типа орбиты">
+          <span class="upload-caption">Выбрать фото</span>
+          <input
+            id="orbit-type-image-file"
+            class="file-input"
+            name="orbitTypeImage"
+            type="file"
+            accept="image/*"
+          >
+        </span>
+      </label>
+
+      <label class="upload-field" for="orbit-type-video-file">
+        <span class="field-label">Видео</span>
+        <span class="upload-box video-upload">
+          <span class="upload-icon" aria-hidden="true">▶</span>
+          <span class="upload-caption">Выбрать видео</span>
+          <input
+            id="orbit-type-video-file"
+            class="file-input"
+            name="orbitTypeVideo"
+            type="file"
+            accept="video/*"
+          >
+        </span>
+      </label>
+
+      <label for="orbit-type-description">Описание</label>
+      <textarea
+        id="orbit-type-description"
+        name="description"
+        rows="4"
+        placeholder="Краткое описание типа орбиты"
+      >{{draftOrbitType.description}}</textarea>
+
+      <label for="orbit-type-height">Высота</label>
+      <div class="input-with-unit">
+        <input
+          id="orbit-type-height"
+          name="height"
+          type="number"
+          min="0"
+          step="1"
+          value="{{draftOrbitType.height}}"
+          placeholder="600"
+        >
+        <span>км</span>
+      </div>
+
+      <label for="orbit-type-inclination">Наклонение</label>
+      <div class="input-with-unit">
+        <input
+          id="orbit-type-inclination"
+          name="inclination"
+          type="number"
+          min="0"
+          max="180"
+          step="0.1"
+          value="{{draftOrbitType.inclination}}"
+          placeholder="98.2"
+        >
+        <span>°</span>
+      </div>
+
+      <label for="orbit-type-select">Тип орбиты</label>
+      <select id="orbit-type-select" name="orbitType">
+        <option value="LEO" {{#if (eq draftOrbitType.orbitCode "LEO")}}selected{{/if}}>
+          Низкая околоземная
+        </option>
+        <option value="GEO" {{#if (eq draftOrbitType.orbitCode "GEO")}}selected{{/if}}>
+          Геостационарная
+        </option>
+        <option value="SSO" {{#if (eq draftOrbitType.orbitCode "SSO")}}selected{{/if}}>
+          Солнечно-синхронная
+        </option>
+      </select>
+    </form>
+  </main>
+
+  {{> navigation isAdd=true}}
+</div>
+
+</body>
+
+</html>

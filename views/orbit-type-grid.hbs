@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<div class="phone">
+  <main class="page orbit-grid-page">
+    <h1>Плитка типов орбит</h1>
+
+    <form method="GET" action="/orbit-type/grid" class="orbit-filter">
+      <label for="max-height">Максимальная высота, км</label>
+      <div class="filter-controls">
+        <input
+          id="max-height"
+          name="maxHeight"
+          type="range"
+          min="0"
+          max="{{maxHeight}}"
+          step="100"
+          value="{{selectedHeight}}"
+          oninput="document.getElementById('selected-height').textContent = this.value + ' км'"
+        >
+        <output id="selected-height">{{selectedHeight}} км</output>
+        <button type="submit">Показать</button>
+      </div>
+    </form>
+
+    <div class="cards-grid">
+      {{#each orbitTypes}}
+        <a
+          href="/?id={{this.id}}"
+          class="orbit-card"
+          aria-label="Открыть тип орбиты в ленте"
+        >
+          <img src="{{this.image}}" alt="Изображение типа орбиты">
+
+          <div class="card-content">
+            <h2>{{this.orbitType}}</h2>
+            <p>Высота: {{this.height}} км</p>
+            <p>Наклонение: {{this.inclination}}°</p>
+
+            <div class="card-footer">
+              <span>♥ {{this.likeCount}}</span>
+              <span class="status">{{this.status}}</span>
+            </div>
+          </div>
+        </a>
+      {{/each}}
+    </div>
+  </main>
+
+  {{> navigation isGrid=true}}
+</div>
+
+</body>
+
+</html>

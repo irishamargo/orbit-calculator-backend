@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<div class="phone">
+  <main class="feed-page">
+    <section class="feed-card">
+      <video
+        class="feed-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="{{orbitType.image}}"
+      >
+        <source src="{{orbitType.video}}" type="video/mp4">
+      </video>
+
+      <div class="feed-overlay"></div>
+
+      <div class="feed-content">
+        <div class="feed-layout">
+          <div class="feed-info">
+          <p class="orbit-type">{{orbitType.orbitType}} ({{orbitType.orbitCode}})</p>
+
+          <div class="feed-description-block">
+            <p class="feed-description">
+              <span class="description-start">
+                {{orbitType.descriptionStart}}<span class="description-ellipsis">...</span>
+              </span>
+              <span class="description-continuation">{{orbitType.descriptionContinuation}}</span>
+            </p>
+
+            <button
+              type="button"
+              class="more-button"
+              aria-expanded="false"
+              onclick="toggleOrbitTypeDescription(this)"
+            >
+              <span class="details-more">Ещё ↓</span>
+              <span class="details-less">Скрыть ↑</span>
+            </button>
+          </div>
+          </div>
+
+          <div class="feed-actions">
+            <p class="feed-parameter">Высота<strong>{{orbitType.height}} км</strong></p>
+            <p class="feed-parameter">Наклонение<strong>{{orbitType.inclination}}°</strong></p>
+
+            <form class="like-form" action="/orbit-type/like?id={{orbitType.id}}" method="POST">
+              <button
+                type="submit"
+                class="likes {{#if orbitType.isLiked}}liked{{/if}}"
+                aria-pressed="{{orbitType.isLiked}}"
+                aria-label="Поставить или убрать лайк"
+                title="Лайк"
+              >
+                <span class="heart" aria-hidden="true">{{#if orbitType.isLiked}}♥{{else}}♡{{/if}}</span>
+                <span class="like-count">{{orbitType.likeCount}}</span>
+              </button>
+            </form>
+
+            <a
+              href="/?id={{nextOrbitType.id}}&next=true"
+              class="next-button"
+              aria-label="Следующий тип орбиты"
+              title="Следующий тип орбиты"
+            >→</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  {{> navigation isHome=true}}
+</div>
+
+<script>
+  function toggleOrbitTypeDescription(button) {
+    const block = button.closest('.feed-description-block');
+    const isExpanded = block.classList.toggle('is-open');
+
+    button.setAttribute('aria-expanded', String(isExpanded));
+  }
+</script>
+
+</body>
+
+</html>
