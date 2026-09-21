@@ -34,15 +34,17 @@
 
     <div class="cards-grid">
       {{#each orbitTypes}}
+      <article class="orbit-card">
         <a
           href="/?id={{this.id}}"
-          class="orbit-card"
+          class="orbit-card-link"
           aria-label="Открыть тип орбиты в ленте"
         >
-          <img src="{{this.image}}" alt="Изображение типа орбиты">
+          <img src="{{this.image}}" alt="Изображение типа орбиты" onerror="this.onerror=null;this.src='/media/default-orbit.svg'">
 
           <div class="card-content">
-            <h2>{{this.orbitType}}</h2>
+            <h2>{{this.name}}</h2>
+            <p>{{this.orbitType}}</p>
             <p>Высота: {{this.height}} км</p>
             <p>Наклонение: {{this.inclination}}°</p>
 
@@ -52,6 +54,11 @@
             </div>
           </div>
         </a>
+        <form class="delete-form" method="POST" action="/orbit-type/delete" onsubmit="return confirm('Удалить тип орбиты?')">
+          <input type="hidden" name="orbitTypeId" value="{{this.id}}">
+          <button type="submit" title="Удалить тип орбиты" aria-label="Удалить тип орбиты">Удалить</button>
+        </form>
+      </article>
       {{/each}}
     </div>
   </main>

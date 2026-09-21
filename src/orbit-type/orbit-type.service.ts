@@ -1,9 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, LessThanOrEqual, Repository } from 'typeorm';
 
-export type OrbitTypeStatus = 'Опубликован' | 'Черновик' | 'Удален';
+import { OrbitTypeEntity } from './entities/orbit-type.entity.js';
 
-export interface OrbitType {
+export const CURRENT_ORBIT_TYPE_USER_ID = 1;
+export const MAX_ORBIT_TYPE_HEIGHT = 40000;
+export const DEFAULT_ORBIT_IMAGE = '/media/default-orbit.svg';
+export const DEFAULT_ORBIT_VIDEO = '/media/default-orbit.webm';
+
+export interface OrbitTypeView {
   id: number;
+  name: string;
   orbitType: string;
   orbitCode: string;
   height: number;
@@ -11,124 +19,141 @@ export interface OrbitType {
   description: string;
   image: string;
   video: string;
-  likedBy: number[];
-  status: OrbitTypeStatus;
-}
-
-export interface OrbitTypeView extends OrbitType {
+  videoType: string;
+  status: string;
   likeCount: number;
   isLiked: boolean;
-  isDraft: boolean;
   descriptionStart: string;
   descriptionContinuation: string;
 }
 
-export const CURRENT_ORBIT_TYPE_USER_ID = 1;
-export const MAX_ORBIT_TYPE_HEIGHT = 40000;
+const ORBIT_KINDS: Record<string, string> = {
+  LEO: 'Низкая околоземная',
+  GEO: 'Геостационарная',
+  SSO: 'Солнечно-синхронная',
+};
 
 @Injectable()
 export class OrbitTypeService {
-  private readonly orbitTypes: OrbitType[] = [
-    {
-      id: 1,
-      orbitType: 'Низкая околоземная',
-      orbitCode: 'LEO',
-      height: 400,
-      inclination: 51.6,
-      description:
-        'Орбита на высоте 400 км используется для спутников дистанционного зондирования и мониторинга Земли.',
-      image: 'http://localhost:9000/orbit-media/image/astra-1.png',
-      video: 'http://localhost:9000/orbit-media/videos/astra-1.mp4',
-      likedBy: [2, 3, 4],
-      status: 'Опубликован',
-    },
-    {
-      id: 2,
-      orbitType: 'Низкая околоземная',
-      orbitCode: 'LEO',
-      height: 800,
-      inclination: 97.4,
-      description:
-        'Орбита на высоте 800 км используется для спутников дистанционного зондирования и мониторинга Земли.',
-      image: 'http://localhost:9000/orbit-media/image/meteor-2.png',
-      video: 'http://localhost:9000/orbit-media/videos/meteor-2.mp4',
-      likedBy: [1, 2],
-      status: 'Опубликован',
-    },
-    {
-      id: 3,
-      orbitType: 'Геостационарная',
-      orbitCode: 'GEO',
-      height: 35786,
-      inclination: 0,
-      description:
-        'Геостационарная орбита позволяет спутнику постоянно находиться над одной областью Земли.',
-      image: 'http://localhost:9000/orbit-media/image/geosat-1.png',
-      video: 'http://localhost:9000/orbit-media/videos/geosat-1.mp4',
-      likedBy: [2, 3, 4, 5],
-      status: 'Опубликован',
-    },
-    {
-      id: 4,
-      orbitType: 'Солнечно-синхронная',
-      orbitCode: 'SSO',
-      height: 600,
-      inclination: 98.2,
-      description:
-        'Солнечно-синхронная орбита позволяет спутнику проходить над заданными участками Земли примерно в одно и то же местное солнечное время.',
-      image: 'http://localhost:9000/orbit-media/image/sfera.png',
-      video: 'http://localhost:9000/orbit-media/videos/sfera.mp4',
-      likedBy: [],
-      status: 'Черновик',
-    },
-    {
-      id: 5,
-      orbitType: 'Низкая околоземная',
-      orbitCode: 'LEO',
-      height: 500,
-      inclination: 45,
-      description: 'Архивная орбита не отображается в пользовательском интерфейсе.',
-      image: '',
-      video: '',
-      likedBy: [],
-      status: 'Удален',
-    },
-  ];
+  constructor(
+    @InjectRepository(OrbitTypeEntity)
+    private readonly orbitTypes: Repository<OrbitTypeEntity>,
+    private readonly dataSource: DataSource,
+  ) {}
 
-  getPublishedOrbitTypes(): OrbitType[] {
-    return this.orbitTypes.filter(
-      (orbitType) => orbitType.status === 'Опубликован',
-    );
+  async getPublishedOrbitTypes(maxHeight = MAX_ORBIT_TYPE_HEIGHT) {
+    return this.orbitTypes.find({
+      where: { status: 'Опубликован', height: LessThanOrEqual(maxHeight) },
+      relations: { likes: true },
+      order: { id: 'ASC' },
+    });
   }
 
-  getDraftOrbitType(): OrbitType {
-    return (
-      this.orbitTypes.find((orbitType) => orbitType.status === 'Черновик') ??
-      this.orbitTypes[0]
-    );
+  async getDraftOrbitType(userId = CURRENT_ORBIT_TYPE_USER_ID) {
+    return this.orbitTypes.findOne({
+      where: { status: 'Черновик', creatorId: userId },
+    });
   }
 
-  findPublishedOrbitType(id?: number): OrbitType | undefined {
-    return this.getPublishedOrbitTypes().find(
-      (orbitType) => orbitType.id === id,
-    );
-  }
-
-  toggleOrbitTypeLike(id: number, userId: number): OrbitType | undefined {
-    const orbitType = this.findPublishedOrbitType(id);
-
-    if (!orbitType) {
-      return undefined;
+  async createDraft(name: string, userId = CURRENT_ORBIT_TYPE_USER_ID) {
+    const trimmedName = name?.trim();
+    if (!trimmedName || trimmedName.length > 120) {
+      throw new BadRequestException('Укажите название длиной до 120 символов');
     }
 
-    const userIndex = orbitType.likedBy.indexOf(userId);
+    const existingDraft = await this.getDraftOrbitType(userId);
+    if (existingDraft) return existingDraft;
 
-    if (userIndex === -1) {
-      orbitType.likedBy.push(userId);
-    } else {
-      orbitType.likedBy.splice(userIndex, 1);
+    return this.orbitTypes.save(
+      this.orbitTypes.create({
+        name: trimmedName,
+        creatorId: userId,
+        status: 'Черновик',
+        image: null,
+        video: null,
+        formedAt: null,
+      }),
+    );
+  }
+
+  async publishDraft(
+    input: { description: string; height: string; inclination: string; orbitCode: string },
+    userId = CURRENT_ORBIT_TYPE_USER_ID,
+  ) {
+    const draft = await this.getDraftOrbitType(userId);
+    if (!draft) throw new NotFoundException('Черновик не найден');
+
+    const height = Number(input.height);
+    const inclination = Number(input.inclination);
+    const description = input.description?.trim();
+    const orbitType = ORBIT_KINDS[input.orbitCode];
+
+    if (
+      !description ||
+      description.length > 2000 ||
+      !input.height ||
+      !Number.isFinite(height) ||
+      height < 0 ||
+      height > MAX_ORBIT_TYPE_HEIGHT ||
+      !input.inclination ||
+      !Number.isFinite(inclination) ||
+      inclination < 0 ||
+      inclination > 180 ||
+      !orbitType
+    ) {
+      throw new BadRequestException('Проверьте описание, высоту, наклонение и тип орбиты');
     }
 
-    return orbitType;
+    draft.description = description;
+    draft.height = height;
+    draft.inclination = inclination;
+    draft.orbitCode = input.orbitCode;
+    draft.orbitType = orbitType;
+    draft.status = 'Опубликован';
+    draft.formedAt = new Date();
+    return this.orbitTypes.save(draft);
+  }
+
+  async deletePublishedWithSql(id: number) {
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      throw new BadRequestException('Некорректный идентификатор');
+    }
+
+    // Логическое удаление выполняется SQL-запросом, без Repository.update().
+    const result: Array<{ orbit_type_id: number }> = await this.dataSource.query(
+      `UPDATE orbit_types SET orbit_status = $1
+       WHERE orbit_type_id = $2 AND orbit_status = $3
+       RETURNING orbit_type_id`,
+      ['Удален', id, 'Опубликован'],
+    );
+    if (result.length === 0) throw new NotFoundException('Опубликованная орбита не найдена');
+  }
+
+  toView(orbitType: OrbitTypeEntity): OrbitTypeView {
+    const description = orbitType.description || '';
+    const words = description.trim().split(/\s+/);
+    const splitIndex = words.findIndex((_, index) => words.slice(0, index + 1).join(' ').length > 32);
+    const start = splitIndex > 0 ? words.slice(0, splitIndex) : words;
+    const continuation = splitIndex > 0 ? words.slice(splitIndex) : [];
+
+    return {
+      id: orbitType.id,
+      name: orbitType.name,
+      orbitType: orbitType.orbitType,
+      orbitCode: orbitType.orbitCode,
+      height: orbitType.height,
+      inclination: orbitType.inclination,
+      description,
+      image: orbitType.image || DEFAULT_ORBIT_IMAGE,
+      video: orbitType.video || DEFAULT_ORBIT_VIDEO,
+      videoType: orbitType.video?.toLowerCase().split('?')[0].endsWith('.mp4')
+        ? 'video/mp4'
+        : 'video/webm',
+      status: orbitType.status,
+      likeCount: orbitType.likes?.length ?? 0,
+      isLiked: orbitType.likes?.some((like) => like.userId === CURRENT_ORBIT_TYPE_USER_ID) ?? false,
+      descriptionStart: start.join(' ').replace(/[.!?]+$/, ''),
+      descriptionContinuation: continuation.join(' '),
+    };
   }
 }

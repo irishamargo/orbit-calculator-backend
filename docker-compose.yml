@@ -1,4 +1,28 @@
 services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: orbit_user
+      POSTGRES_PASSWORD: orbit_password
+      POSTGRES_DB: orbit_calculator
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orbit_user -d orbit_calculator"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   minio:
     container_name: minio_storage
     image: minio/minio:latest
@@ -15,3 +39,4 @@ services:
 
 volumes:
   minio-data:
+  postgres-data:

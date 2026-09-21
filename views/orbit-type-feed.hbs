@@ -12,6 +12,7 @@
 
 <div class="phone">
   <main class="feed-page">
+    {{#if orbitType}}
     <section class="feed-card">
       <video
         class="feed-video"
@@ -21,7 +22,7 @@
         playsinline
         poster="{{orbitType.image}}"
       >
-        <source src="{{orbitType.video}}" type="video/mp4">
+        <source src="{{orbitType.video}}" type="{{orbitType.videoType}}">
       </video>
 
       <div class="feed-overlay"></div>
@@ -29,6 +30,7 @@
       <div class="feed-content">
         <div class="feed-layout">
           <div class="feed-info">
+          <h1>{{orbitType.name}}</h1>
           <p class="orbit-type">{{orbitType.orbitType}} ({{orbitType.orbitCode}})</p>
 
           <div class="feed-description-block">
@@ -55,21 +57,13 @@
             <p class="feed-parameter">Высота<strong>{{orbitType.height}} км</strong></p>
             <p class="feed-parameter">Наклонение<strong>{{orbitType.inclination}}°</strong></p>
 
-            <form class="like-form" action="/orbit-type/like?id={{orbitType.id}}" method="POST">
-              <button
-                type="submit"
-                class="likes {{#if orbitType.isLiked}}liked{{/if}}"
-                aria-pressed="{{orbitType.isLiked}}"
-                aria-label="Поставить или убрать лайк"
-                title="Лайк"
-              >
+            <div class="likes" aria-label="Лайков: {{orbitType.likeCount}}">
                 <span class="heart" aria-hidden="true">{{#if orbitType.isLiked}}♥{{else}}♡{{/if}}</span>
                 <span class="like-count">{{orbitType.likeCount}}</span>
-              </button>
-            </form>
+            </div>
 
             <a
-              href="/?id={{nextOrbitType.id}}&next=true"
+              href="/?id={{nextOrbitType.id}}"
               class="next-button"
               aria-label="Следующий тип орбиты"
               title="Следующий тип орбиты"
@@ -78,12 +72,28 @@
         </div>
       </div>
     </section>
+    {{else}}
+    <section class="empty-feed">Пока нет опубликованных типов орбит.</section>
+    {{/if}}
   </main>
 
   {{> navigation isHome=true}}
 </div>
 
 <script>
+  const feedVideo = document.querySelector('.feed-video');
+  const videoSource = feedVideo?.querySelector('source');
+  function useDefaultVideo() {
+    if (!videoSource || new URL(videoSource.src).pathname === '/media/default-orbit.webm') return;
+    videoSource.src = '/media/default-orbit.webm';
+    videoSource.type = 'video/webm';
+    feedVideo.poster = '/media/default-orbit.svg';
+    feedVideo.load();
+    feedVideo.play().catch(() => {});
+  }
+  feedVideo?.addEventListener('error', useDefaultVideo);
+  videoSource?.addEventListener('error', useDefaultVideo);
+
   function toggleOrbitTypeDescription(button) {
     const block = button.closest('.feed-description-block');
     const isExpanded = block.classList.toggle('is-open');

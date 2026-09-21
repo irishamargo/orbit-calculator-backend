@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 960" role="img" aria-label="Земля и орбита">
+  <rect width="640" height="960" fill="#101b2b"/>
+  <circle cx="320" cy="480" r="215" fill="#147d9a"/>
+  <path d="M170 370c55-70 92-40 136-94 51 2 73 28 88 66-38 26-56 38-45 74-38 22-53 47-103 28-18-29-53-25-76-74Zm168 209c53-49 84-29 123-48 21 31 18 71-13 104-31 35-62 48-90 50-17-38-20-68-20-106Z" fill="#7bcc8e"/>
+  <circle cx="320" cy="480" r="215" fill="none" stroke="#b9e2ea" stroke-opacity=".5" stroke-width="10"/>
+  <ellipse cx="320" cy="480" rx="298" ry="132" fill="none" stroke="#e1ebf1" stroke-width="5" transform="rotate(-27 320 480)"/>
+  <circle cx="553" cy="340" r="12" fill="#f5d477"/>
+  <g fill="#e8f0f4" opacity=".85">
+    <circle cx="84" cy="174" r="3"/><circle cx="507" cy="165" r="2"/><circle cx="554" cy="727" r="3"/>
+    <circle cx="113" cy="730" r="2"/><circle cx="438" cy="94" r="2"/><circle cx="233" cy="845" r="2"/>
+  </g>
+</svg>

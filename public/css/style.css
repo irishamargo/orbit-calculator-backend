@@ -43,7 +43,7 @@ body {
 /* MOBILE APP */
 
 .phone {
-  width: 390px;
+  width: min(390px, 100%);
   min-height: 100vh;
 
   background: var(--page);
@@ -310,7 +310,7 @@ body {
 
   bottom: 0;
 
-  width: 390px;
+  width: min(390px, 100%);
   height: 42px;
 
   display: flex;
@@ -506,10 +506,24 @@ textarea {
   color: var(--page);
   text-align: center;
   font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.upload-icon {
-  font-size: 28px;
+.upload-video-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.step-fields[hidden],
+.draft[hidden],
+.form-error[hidden],
+.upload-video-preview[hidden] {
+  display: none;
 }
 
 .file-input {
@@ -528,10 +542,48 @@ textarea {
   font-size: 14px;
 }
 
+.draft strong {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.step-fields {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.form-error {
+  color: #a62a33;
+  font-size: 14px;
+}
+
 /* ORBIT GRID */
 
 .orbit-grid-page {
   padding-bottom: 20px;
+}
+
+.primary-action {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 24px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--page);
+  font: 600 15px var(--font-main);
+  cursor: pointer;
+}
+
+.primary-action:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.empty-feed {
+  padding: 32px 16px;
 }
 
 .orbit-grid-page h1 {
@@ -603,6 +655,29 @@ textarea {
   box-shadow: var(--card-shadow);
 }
 
+.orbit-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.delete-form {
+  padding: 0 7px 8px;
+}
+
+.delete-form input {
+  display: none;
+}
+
+.delete-form button {
+  border: 0;
+  padding: 5px 0;
+  background: none;
+  color: #a62a33;
+  font: 600 12px var(--font-main);
+  cursor: pointer;
+}
+
 .orbit-card:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -630,6 +705,7 @@ textarea {
 
   font-size: 16px;
   line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .card-content p {
