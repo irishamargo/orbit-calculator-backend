@@ -16,13 +16,18 @@ describe('OrbitTypeService', () => {
     create: vi.fn((value) => value),
     save: vi.fn((value) => Promise.resolve(value)),
   };
-  const dataSource = { query: vi.fn() };
+  const manager = { query: vi.fn() };
+  const dataSource = {
+    transaction: vi.fn(async (work: (transactionManager: typeof manager) => Promise<void>) => work(manager)),
+  };
   const service = new OrbitTypeService(
     repository as unknown as Repository<OrbitTypeEntity>,
     dataSource as unknown as DataSource,
   );
 
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('получает только опубликованные записи через ORM с фильтром высоты', async () => {
     repository.find.mockResolvedValue([]);
@@ -81,18 +86,61 @@ describe('OrbitTypeService', () => {
     expect(repository.save).not.toHaveBeenCalled();
   });
 
-  it('удаляет только опубликованную запись параметризованным SQL UPDATE', async () => {
-    dataSource.query.mockResolvedValue([{ orbit_type_id: 2 }]);
-    await service.deletePublishedWithSql(2);
+  it('удаляет опубликованную запись через SQL-курсор в транзакции', async () => {
+    manager.query.mockImplementation(async (sql: string) => {
+      if (sql.startsWith('FETCH')) return [{ orbit_type_id: 2 }];
+      if (sql.startsWith('UPDATE')) return [[{ orbit_type_id: 2 }], 1];
+      return [];
+    });
 
-    const [sql, params] = dataSource.query.mock.calls[0];
-    expect(sql).toContain('UPDATE orbit_types SET orbit_status = $1');
-    expect(sql).toContain('RETURNING orbit_type_id');
-    expect(params).toEqual(['Удален', 2, 'Опубликован']);
+    await service.deletePublishedWithCursor(2);
+
+    expect(dataSource.transaction).toHaveBeenCalledOnce();
+    expect(manager.query).toHaveBeenNthCalledWith(1,
+      expect.stringContaining('DECLARE c CURSOR FOR'),
+      [2],
+    );
+    expect(manager.query).toHaveBeenNthCalledWith(2, 'FETCH NEXT FROM c');
+    expect(manager.query).toHaveBeenNthCalledWith(3,
+      expect.stringContaining('WHERE CURRENT OF c RETURNING orbit_type_id'),
+    );
+    expect(manager.query).toHaveBeenNthCalledWith(4, 'CLOSE c');
   });
 
   it('не удаляет повторно уже удаленную запись', async () => {
-    dataSource.query.mockResolvedValue([]);
-    await expect(service.deletePublishedWithSql(2)).rejects.toBeInstanceOf(NotFoundException);
+    manager.query.mockResolvedValue([]);
+
+    await expect(service.deletePublishedWithCursor(2)).rejects.toBeInstanceOf(NotFoundException);
+
+    expect(manager.query).toHaveBeenCalledTimes(2);
+  });
+
+  it('откатывает транзакцию, если SQL UPDATE завершился ошибкой', async () => {
+    manager.query.mockImplementation(async (sql: string) => {
+      if (sql.startsWith('FETCH')) return [{ orbit_type_id: 2 }];
+      if (sql.startsWith('UPDATE')) throw new Error('Ошибка БД');
+      return [];
+    });
+
+    await expect(service.deletePublishedWithCursor(2)).rejects.toThrow('Ошибка БД');
+
+    expect(manager.query).toHaveBeenCalledTimes(3);
+  });
+
+  it('не подтверждает транзакцию, если курсор не обновил строку', async () => {
+    manager.query.mockImplementation(async (sql: string) => {
+      if (sql.startsWith('FETCH')) return [{ orbit_type_id: 2 }];
+      if (sql.startsWith('UPDATE')) return [[], 0];
+      return [];
+    });
+
+    await expect(service.deletePublishedWithCursor(2)).rejects.toBeInstanceOf(NotFoundException);
+
+    expect(manager.query).toHaveBeenCalledTimes(3);
+  });
+
+  it('не открывает курсор для некорректного идентификатора', async () => {
+    await expect(service.deletePublishedWithCursor(0)).rejects.toBeInstanceOf(BadRequestException);
+    expect(dataSource.transaction).not.toHaveBeenCalled();
   });
 });

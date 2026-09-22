@@ -87,6 +87,6 @@ export class OrbitTypeController {
   @Post('orbit-type/delete')
   @Redirect('/orbit-type/grid', 303)
   async deleteOrbitType(@Body('orbitTypeId') orbitTypeId: string) {
-    await this.orbitTypeService.deletePublishedWithSql(Number(orbitTypeId));
+    await this.orbitTypeService.deletePublishedWithCursor(Number(orbitTypeId));
   }
 }

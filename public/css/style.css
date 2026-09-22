@@ -154,25 +154,9 @@ body {
   margin: 0 !important;
   font-size: 15px !important;
   line-height: 1.25 !important;
-}
-
-.description-start {
-  display: block;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.description-continuation {
-  display: none;
-  margin-top: 0;
-}
-
-.feed-description-block.is-open .description-ellipsis {
-  display: none;
-}
-
-.feed-description-block.is-open .description-continuation {
-  display: block;
+  max-height: 35vh;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
 }
 
 .feed-parameter {
@@ -223,18 +207,6 @@ body {
 
 .more-button:hover {
   opacity: 0.8;
-}
-
-.details-less {
-  display: none;
-}
-
-.feed-description-block.is-open .details-more {
-  display: none;
-}
-
-.feed-description-block.is-open .details-less {
-  display: inline;
 }
 
 /* BOTTOM FEED */

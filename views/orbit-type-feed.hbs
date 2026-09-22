@@ -34,21 +34,17 @@
           <p class="orbit-type">{{orbitType.orbitType}} ({{orbitType.orbitCode}})</p>
 
           <div class="feed-description-block">
-            <p class="feed-description">
-              <span class="description-start">
-                {{orbitType.descriptionStart}}<span class="description-ellipsis">...</span>
-              </span>
-              <span class="description-continuation">{{orbitType.descriptionContinuation}}</span>
-            </p>
+            <p class="feed-description" id="orbit-description" hidden>{{orbitType.description}}</p>
 
             <button
               type="button"
               class="more-button"
+              aria-controls="orbit-description"
               aria-expanded="false"
               onclick="toggleOrbitTypeDescription(this)"
             >
               <span class="details-more">Ещё ↓</span>
-              <span class="details-less">Скрыть ↑</span>
+              <span class="details-less" hidden>Скрыть ↑</span>
             </button>
           </div>
           </div>
@@ -96,8 +92,12 @@
 
   function toggleOrbitTypeDescription(button) {
     const block = button.closest('.feed-description-block');
-    const isExpanded = block.classList.toggle('is-open');
+    const description = block.querySelector('.feed-description');
+    const isExpanded = description.hidden;
 
+    description.hidden = !isExpanded;
+    button.querySelector('.details-more').hidden = isExpanded;
+    button.querySelector('.details-less').hidden = !isExpanded;
     button.setAttribute('aria-expanded', String(isExpanded));
   }
 </script>

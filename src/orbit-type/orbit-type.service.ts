@@ -23,8 +23,6 @@ export interface OrbitTypeView {
   status: string;
   likeCount: number;
   isLiked: boolean;
-  descriptionStart: string;
-  descriptionContinuation: string;
 }
 
 const ORBIT_KINDS: Record<string, string> = {
@@ -114,27 +112,31 @@ export class OrbitTypeService {
     return this.orbitTypes.save(draft);
   }
 
-  async deletePublishedWithSql(id: number) {
+  async deletePublishedWithCursor(id: number) {
     if (!Number.isSafeInteger(id) || id <= 0) {
       throw new BadRequestException('Некорректный идентификатор');
     }
 
-    // Логическое удаление выполняется SQL-запросом, без Repository.update().
-    const result: Array<{ orbit_type_id: number }> = await this.dataSource.query(
-      `UPDATE orbit_types SET orbit_status = $1
-       WHERE orbit_type_id = $2 AND orbit_status = $3
-       RETURNING orbit_type_id`,
-      ['Удален', id, 'Опубликован'],
-    );
-    if (result.length === 0) throw new NotFoundException('Опубликованная орбита не найдена');
+    await this.dataSource.transaction(async (manager) => {
+      await manager.query(
+        `DECLARE c CURSOR FOR SELECT orbit_type_id FROM orbit_types
+         WHERE orbit_type_id = $1 AND orbit_status = 'Опубликован' FOR UPDATE`,
+        [id],
+      );
+      const rows = await manager.query('FETCH NEXT FROM c');
+      if (!rows.length) throw new NotFoundException('Опубликованная орбита не найдена');
+
+      const [, count] = await manager.query(
+        `UPDATE orbit_types SET orbit_status = 'Удален'
+         WHERE CURRENT OF c RETURNING orbit_type_id`,
+      );
+      if (count !== 1) throw new NotFoundException('Опубликованная орбита не найдена');
+      await manager.query('CLOSE c');
+    });
   }
 
   toView(orbitType: OrbitTypeEntity): OrbitTypeView {
     const description = orbitType.description || '';
-    const words = description.trim().split(/\s+/);
-    const splitIndex = words.findIndex((_, index) => words.slice(0, index + 1).join(' ').length > 32);
-    const start = splitIndex > 0 ? words.slice(0, splitIndex) : words;
-    const continuation = splitIndex > 0 ? words.slice(splitIndex) : [];
 
     return {
       id: orbitType.id,
@@ -152,8 +154,6 @@ export class OrbitTypeService {
       status: orbitType.status,
       likeCount: orbitType.likes?.length ?? 0,
       isLiked: orbitType.likes?.some((like) => like.userId === CURRENT_ORBIT_TYPE_USER_ID) ?? false,
-      descriptionStart: start.join(' ').replace(/[.!?]+$/, ''),
-      descriptionContinuation: continuation.join(' '),
     };
   }
 }
