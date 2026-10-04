@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrbitTypeModule } from './orbit-type/orbit-type.module.js';
+import { OrbitApiModule } from './orbit-api/orbit-api.module.js';
 import { OrbitTypeEntity } from './orbit-type/entities/orbit-type.entity.js';
 import { OrbitTypeLike } from './orbit-type/entities/orbit-type-like.entity.js';
 import { OrbitUser } from './orbit-type/entities/orbit-user.entity.js';
@@ -23,6 +24,7 @@ import { OrbitUser } from './orbit-type/entities/orbit-user.entity.js';
       }),
     }),
     OrbitTypeModule,
+    OrbitApiModule,
   ],
 })
 export class AppModule {}

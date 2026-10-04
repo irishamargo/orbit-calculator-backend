@@ -3,6 +3,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import hbs from 'hbs';
+import { ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module.js';
 
@@ -11,6 +12,12 @@ const __dirname = dirname(__filename);
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }));
 
   // Handlebars
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
