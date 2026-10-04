@@ -41,6 +41,32 @@ describe('OrbitTypeService', () => {
     );
   });
 
+  it('получает следующую опубликованную запись из БД, пропуская отсутствующие id', async () => {
+    const nextOrbitType = { id: 12, status: 'Опубликован' };
+    repository.findOne.mockResolvedValue(nextOrbitType);
+
+    await expect(service.getNextPublishedOrbitType(4)).resolves.toBe(nextOrbitType);
+
+    const options = repository.findOne.mock.calls[0][0];
+    expect(options.where.status).toBe('Опубликован');
+    expect(options.where.id.type).toBe('moreThan');
+    expect(options.where.id.value).toBe(4);
+    expect(options.order).toEqual({ id: 'ASC' });
+  });
+
+  it('переходит к первой опубликованной записи, если следующего id нет', async () => {
+    const firstOrbitType = { id: 2, status: 'Опубликован' };
+    repository.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(firstOrbitType);
+
+    await expect(service.getNextPublishedOrbitType(12)).resolves.toBe(firstOrbitType);
+
+    expect(repository.findOne).toHaveBeenCalledTimes(2);
+    expect(repository.findOne.mock.calls[1][0]).toEqual(expect.objectContaining({
+      where: { status: 'Опубликован' },
+      order: { id: 'ASC' },
+    }));
+  });
+
   it('не создает второй черновик пользователя', async () => {
     const draft = { id: 3, name: 'Черновик' };
     repository.findOne.mockResolvedValue(draft);
@@ -49,13 +75,14 @@ describe('OrbitTypeService', () => {
     expect(repository.save).not.toHaveBeenCalled();
   });
 
-  it('создает черновик без фото и видео и отображает стандартные медиа', async () => {
+  it('создает черновик со стандартными URL фото и видео', async () => {
     repository.findOne.mockResolvedValue(null);
 
     const draft = await service.createDraft('Новая орбита');
 
     expect(repository.save).toHaveBeenCalledWith(expect.objectContaining({
-      name: 'Новая орбита', status: 'Черновик', image: null, video: null,
+      name: 'Новая орбита', status: 'Черновик',
+      image: DEFAULT_ORBIT_IMAGE, video: DEFAULT_ORBIT_VIDEO,
     }));
     expect(service.toView(draft)).toEqual(expect.objectContaining({
       image: DEFAULT_ORBIT_IMAGE,
@@ -69,19 +96,19 @@ describe('OrbitTypeService', () => {
     repository.findOne.mockResolvedValue(draft);
 
     await service.publishDraft({
-      description: 'Наблюдение Земли', height: '600', inclination: '98.2', orbitCode: 'SSO',
+      description: 'Наблюдение Земли', height: '600', inclination: '98.2',
     });
 
     expect(repository.save).toHaveBeenCalledWith(expect.objectContaining({
       status: 'Опубликован', height: 600, inclination: 98.2,
-      orbitType: 'Солнечно-синхронная', formedAt: expect.any(Date),
+      formedAt: expect.any(Date),
     }));
   });
 
   it('не публикует некорректные значения', async () => {
     repository.findOne.mockResolvedValue({ id: 3, status: 'Черновик' });
     await expect(service.publishDraft({
-      description: 'Орбита', height: '-1', inclination: '98', orbitCode: 'SSO',
+      description: 'Орбита', height: '-1', inclination: '98',
     })).rejects.toBeInstanceOf(BadRequestException);
     expect(repository.save).not.toHaveBeenCalled();
   });

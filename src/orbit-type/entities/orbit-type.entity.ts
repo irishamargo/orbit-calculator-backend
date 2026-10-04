@@ -27,26 +27,30 @@ export class OrbitTypeEntity {
   @Column({ name: 'orbit_name', length: 120 })
   name: string;
 
-  @Column({ name: 'orbit_kind', length: 80, default: '' })
-  orbitType: string;
+  @Column({ name: 'orbit_height_km', type: 'integer', nullable: true })
+  height: number | null;
 
-  @Column({ name: 'orbit_code', length: 12, default: '' })
-  orbitCode: string;
+  @Column({ name: 'orbit_inclination_deg', type: 'real', nullable: true })
+  inclination: number | null;
 
-  @Column({ name: 'orbit_height_km', type: 'integer', default: 0 })
-  height: number;
+  @Column({ name: 'orbit_description', type: 'text', nullable: true })
+  description: string | null;
 
-  @Column({ name: 'orbit_inclination_deg', type: 'real', default: 0 })
-  inclination: number;
+  @Column({
+    name: 'orbit_image_url',
+    type: 'varchar',
+    length: 500,
+    default: '/media/default-orbit.svg',
+  })
+  image: string;
 
-  @Column({ name: 'orbit_description', type: 'text', default: '' })
-  description: string;
-
-  @Column({ name: 'orbit_image_url', type: 'varchar', length: 500, nullable: true })
-  image: string | null;
-
-  @Column({ name: 'orbit_video_url', type: 'varchar', length: 500, nullable: true })
-  video: string | null;
+  @Column({
+    name: 'orbit_video_url',
+    type: 'varchar',
+    length: 500,
+    default: '/media/default-orbit.webm',
+  })
+  video: string;
 
   @Column({ name: 'orbit_status', type: 'varchar', length: 20 })
   status: OrbitTypeStatus;

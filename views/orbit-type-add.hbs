@@ -57,14 +57,6 @@
           <span>°</span>
         </div>
 
-        <label for="orbit-type-select">Тип орбиты</label>
-        <select id="orbit-type-select" name="orbitCode" required>
-          <option value="" disabled {{#unless draftOrbitType.orbitCode}}selected{{/unless}}>Выберите тип</option>
-          <option value="LEO" {{#if (eq draftOrbitType.orbitCode "LEO")}}selected{{/if}}>Низкая околоземная</option>
-          <option value="GEO" {{#if (eq draftOrbitType.orbitCode "GEO")}}selected{{/if}}>Геостационарная</option>
-          <option value="SSO" {{#if (eq draftOrbitType.orbitCode "SSO")}}selected{{/if}}>Солнечно-синхронная</option>
-        </select>
-
         <button class="primary-action" type="submit">Опубликовать</button>
       </fieldset>
       <p class="form-error" id="form-error" role="alert" hidden></p>

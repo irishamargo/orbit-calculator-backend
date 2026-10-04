@@ -31,9 +31,9 @@
         <div class="feed-layout">
           <div class="feed-info">
           <h1>{{orbitType.name}}</h1>
-          <p class="orbit-type">{{orbitType.orbitType}} ({{orbitType.orbitCode}})</p>
 
           <div class="feed-description-block">
+            <p class="feed-description-preview" id="orbit-description-preview">{{orbitType.description}}</p>
             <p class="feed-description" id="orbit-description" hidden>{{orbitType.description}}</p>
 
             <button
@@ -92,10 +92,12 @@
 
   function toggleOrbitTypeDescription(button) {
     const block = button.closest('.feed-description-block');
+    const preview = block.querySelector('.feed-description-preview');
     const description = block.querySelector('.feed-description');
     const isExpanded = description.hidden;
 
     description.hidden = !isExpanded;
+    preview.hidden = isExpanded;
     button.querySelector('.details-more').hidden = isExpanded;
     button.querySelector('.details-less').hidden = !isExpanded;
     button.setAttribute('aria-expanded', String(isExpanded));

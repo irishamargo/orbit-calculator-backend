@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, LessThanOrEqual, Repository } from 'typeorm';
+import { DataSource, LessThanOrEqual, MoreThan, Repository } from 'typeorm';
 
 import { OrbitTypeEntity } from './entities/orbit-type.entity.js';
 
@@ -12,8 +12,6 @@ export const DEFAULT_ORBIT_VIDEO = '/media/default-orbit.webm';
 export interface OrbitTypeView {
   id: number;
   name: string;
-  orbitType: string;
-  orbitCode: string;
   height: number;
   inclination: number;
   description: string;
@@ -24,12 +22,6 @@ export interface OrbitTypeView {
   likeCount: number;
   isLiked: boolean;
 }
-
-const ORBIT_KINDS: Record<string, string> = {
-  LEO: 'Низкая околоземная',
-  GEO: 'Геостационарная',
-  SSO: 'Солнечно-синхронная',
-};
 
 @Injectable()
 export class OrbitTypeService {
@@ -45,6 +37,24 @@ export class OrbitTypeService {
       relations: { likes: true },
       order: { id: 'ASC' },
     });
+  }
+
+  async getPublishedOrbitType(id?: number) {
+    return this.orbitTypes.findOne({
+      where: { status: 'Опубликован', ...(id === undefined ? {} : { id }) },
+      relations: { likes: true },
+      order: { id: 'ASC' },
+    });
+  }
+
+  async getNextPublishedOrbitType(id: number) {
+    const nextOrbitType = await this.orbitTypes.findOne({
+      where: { id: MoreThan(id), status: 'Опубликован' },
+      relations: { likes: true },
+      order: { id: 'ASC' },
+    });
+
+    return nextOrbitType ?? this.getPublishedOrbitType();
   }
 
   async getDraftOrbitType(userId = CURRENT_ORBIT_TYPE_USER_ID) {
@@ -67,15 +77,15 @@ export class OrbitTypeService {
         name: trimmedName,
         creatorId: userId,
         status: 'Черновик',
-        image: null,
-        video: null,
+        image: DEFAULT_ORBIT_IMAGE,
+        video: DEFAULT_ORBIT_VIDEO,
         formedAt: null,
       }),
     );
   }
 
   async publishDraft(
-    input: { description: string; height: string; inclination: string; orbitCode: string },
+    input: { description: string; height: string; inclination: string },
     userId = CURRENT_ORBIT_TYPE_USER_ID,
   ) {
     const draft = await this.getDraftOrbitType(userId);
@@ -84,7 +94,6 @@ export class OrbitTypeService {
     const height = Number(input.height);
     const inclination = Number(input.inclination);
     const description = input.description?.trim();
-    const orbitType = ORBIT_KINDS[input.orbitCode];
 
     if (
       !description ||
@@ -96,17 +105,14 @@ export class OrbitTypeService {
       !input.inclination ||
       !Number.isFinite(inclination) ||
       inclination < 0 ||
-      inclination > 180 ||
-      !orbitType
+      inclination > 180
     ) {
-      throw new BadRequestException('Проверьте описание, высоту, наклонение и тип орбиты');
+      throw new BadRequestException('Проверьте описание, высоту и наклонение');
     }
 
     draft.description = description;
     draft.height = height;
     draft.inclination = inclination;
-    draft.orbitCode = input.orbitCode;
-    draft.orbitType = orbitType;
     draft.status = 'Опубликован';
     draft.formedAt = new Date();
     return this.orbitTypes.save(draft);
@@ -141,10 +147,8 @@ export class OrbitTypeService {
     return {
       id: orbitType.id,
       name: orbitType.name,
-      orbitType: orbitType.orbitType,
-      orbitCode: orbitType.orbitCode,
-      height: orbitType.height,
-      inclination: orbitType.inclination,
+      height: orbitType.height ?? 0,
+      inclination: orbitType.inclination ?? 0,
       description,
       image: orbitType.image || DEFAULT_ORBIT_IMAGE,
       video: orbitType.video || DEFAULT_ORBIT_VIDEO,

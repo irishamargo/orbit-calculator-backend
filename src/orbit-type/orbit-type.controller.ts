@@ -21,21 +21,22 @@ export class OrbitTypeController {
 
   @Get()
   @Render('orbit-type-feed')
-  async getOrbitTypeFeed(@Query('id') id?: string, @Query('next') next?: string) {
-    const orbitTypes = await this.orbitTypeService.getPublishedOrbitTypes();
-    let currentIndex = 0;
+  async getOrbitTypeFeed(@Query('id') id?: string) {
+    const requestedId = id === undefined ? undefined : Number(id);
+    const orbitType =
+      requestedId === undefined
+        ? await this.orbitTypeService.getPublishedOrbitType()
+        : Number.isSafeInteger(requestedId) && requestedId > 0
+          ? await this.orbitTypeService.getPublishedOrbitType(requestedId)
+          : null;
 
-    if (id !== undefined) {
-      currentIndex = orbitTypes.findIndex((orbitType) => orbitType.id === Number(id));
-      if (currentIndex < 0) throw new NotFoundException('Тип орбиты не найден или удален');
+    if (id !== undefined && !orbitType) {
+      throw new NotFoundException('Тип орбиты не найден или удален');
     }
 
-    if (next === 'true' && orbitTypes.length) {
-      currentIndex = (currentIndex + 1) % orbitTypes.length;
-    }
-
-    const orbitType = orbitTypes[currentIndex];
-    const nextOrbitType = orbitTypes[(currentIndex + 1) % orbitTypes.length];
+    const nextOrbitType = orbitType
+      ? await this.orbitTypeService.getNextPublishedOrbitType(orbitType.id)
+      : null;
     return {
       title: 'Лента типов орбит',
       orbitType: orbitType ? this.orbitTypeService.toView(orbitType) : null,
@@ -62,7 +63,7 @@ export class OrbitTypeController {
   @Post('orbit-type/publish')
   @Redirect('/orbit-type/grid', 303)
   async publishDraft(
-    @Body() input: { description: string; height: string; inclination: string; orbitCode: string },
+    @Body() input: { description: string; height: string; inclination: string },
   ) {
     await this.orbitTypeService.publishDraft(input);
   }
