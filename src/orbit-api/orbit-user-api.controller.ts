@@ -12,14 +12,14 @@ export class OrbitUserApiController {
     return this.orbitUserApiService.register(input);
   }
 
-  @Post('authenticate')
-  @HttpCode(HttpStatus.NOT_IMPLEMENTED)
+  @Post('authentication')
+  @HttpCode(HttpStatus.OK)
   authenticateStub() {
     return { message: 'Аутентификация будет реализована в лабораторной работе 4' };
   }
 
-  @Post('logout')
-  @HttpCode(HttpStatus.NOT_IMPLEMENTED)
+  @Post('deauthentication')
+  @HttpCode(HttpStatus.OK)
   logoutStub() {
     return { message: 'Деавторизация будет реализована в лабораторной работе 4' };
   }

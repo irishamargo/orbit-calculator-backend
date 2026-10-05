@@ -61,9 +61,9 @@ export class OrbitMediaStorageService implements OnModuleInit {
 
     try {
       await this.ensureBucket();
+      await this.client.statObject(this.bucketName, value);
       return await this.client.presignedGetObject(this.bucketName, value, 7 * 24 * 60 * 60);
-    } catch (error) {
-      this.logger.warn(`Не удалось получить ссылку MinIO: ${error instanceof Error ? error.message : error}`);
+    } catch {
       return fallback;
     }
   }
