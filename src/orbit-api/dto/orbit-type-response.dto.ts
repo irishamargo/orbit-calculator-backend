@@ -41,5 +41,5 @@ export class OrbitTypeResponseDto {
   likeCount: number;
 
   @Expose()
-  isLiked: boolean;
+  isLiked: 0 | 1;
 }

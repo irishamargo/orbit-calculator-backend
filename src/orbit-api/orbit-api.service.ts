@@ -211,7 +211,7 @@ export class OrbitApiService {
         formedAt: orbitType.formedAt,
         isCreator: orbitType.creatorId === currentUserId ? 1 : 0,
         likeCount: orbitType.likes?.length ?? 0,
-        isLiked: orbitType.likes?.some((like) => like.userId === currentUserId) ?? false,
+        isLiked: orbitType.likes?.some((like) => like.userId === currentUserId) ? 1 : 0,
       },
       { excludeExtraneousValues: true },
     );

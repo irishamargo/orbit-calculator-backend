@@ -20,7 +20,7 @@ export interface OrbitTypeView {
   videoType: string;
   status: string;
   likeCount: number;
-  isLiked: boolean;
+  isLiked: 0 | 1;
 }
 
 @Injectable()
@@ -157,7 +157,7 @@ export class OrbitTypeService {
         : 'video/webm',
       status: orbitType.status,
       likeCount: orbitType.likes?.length ?? 0,
-      isLiked: orbitType.likes?.some((like) => like.userId === CURRENT_ORBIT_TYPE_USER_ID) ?? false,
+      isLiked: orbitType.likes?.some((like) => like.userId === CURRENT_ORBIT_TYPE_USER_ID) ? 1 : 0,
     };
   }
 }
