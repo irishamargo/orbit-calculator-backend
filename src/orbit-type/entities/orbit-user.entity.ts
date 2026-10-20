@@ -18,6 +18,9 @@ export class OrbitUser {
   @Column({ name: 'orbit_user_password', length: 255, default: '' })
   password: string;
 
+  @Column({ name: 'orbit_user_role', length: 20, default: 'user' })
+  role: 'user' | 'moderator';
+
   @OneToMany(() => OrbitTypeEntity, (orbitType) => orbitType.creator)
   orbitTypes: Relation<OrbitTypeEntity[]>;
 

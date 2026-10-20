@@ -9,10 +9,24 @@ import { OrbitApiService } from './orbit-api.service.js';
 import { OrbitMediaStorageService } from './minio.service.js';
 import { OrbitUserApiController } from './orbit-user-api.controller.js';
 import { OrbitUserApiService } from './orbit-user-api.service.js';
+import { OrbitSessionService } from './orbit-session.service.js';
+import {
+  OrbitSessionGuard,
+  OptionalOrbitSessionGuard,
+} from './orbit-session.guard.js';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([OrbitTypeEntity, OrbitTypeLike, OrbitUser])],
+  imports: [
+    TypeOrmModule.forFeature([OrbitTypeEntity, OrbitTypeLike, OrbitUser]),
+  ],
   controllers: [OrbitApiController, OrbitUserApiController],
-  providers: [OrbitApiService, OrbitUserApiService, OrbitMediaStorageService],
+  providers: [
+    OrbitApiService,
+    OrbitUserApiService,
+    OrbitMediaStorageService,
+    OrbitSessionService,
+    OrbitSessionGuard,
+    OptionalOrbitSessionGuard,
+  ],
 })
 export class OrbitApiModule {}

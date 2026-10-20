@@ -9,4 +9,7 @@ export class OrbitUserResponseDto {
 
   @Expose()
   email: string;
+
+  @Expose()
+  role: 'user' | 'moderator';
 }

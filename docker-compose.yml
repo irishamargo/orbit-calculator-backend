@@ -1,4 +1,29 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: orbit_redis
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: orbit_redisinsight
+    ports:
+      - "127.0.0.1:5540:5540"
+    volumes:
+      - redis-insight-data:/data
+    depends_on:
+      redis:
+        condition: service_healthy
+
   postgres:
     image: postgres:17-alpine
     environment:
@@ -38,5 +63,7 @@ services:
     command: server /data --console-address ":9001"
 
 volumes:
+  redis-data:
+  redis-insight-data:
   minio-data:
   postgres-data:

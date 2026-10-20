@@ -19,6 +19,19 @@ const dataSource = new DataSource({
 await dataSource.initialize();
 
 try {
+  const [{ userTableName }] = await dataSource.query(
+    `SELECT to_regclass('public.orbit_users') AS "userTableName"`,
+  );
+
+  if (userTableName) {
+    // Older lab databases do not have a role column. Preserve existing users
+    // and give them the regular user role before the entity schema is synced.
+    await dataSource.query(`
+      ALTER TABLE public.orbit_users
+        ADD COLUMN IF NOT EXISTS orbit_user_role varchar(20) NOT NULL DEFAULT 'user'
+    `);
+  }
+
   const [{ tableName }] = await dataSource.query(
     `SELECT to_regclass('public.orbit_types') AS "tableName"`,
   );

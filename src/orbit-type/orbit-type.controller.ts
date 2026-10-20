@@ -8,6 +8,7 @@ import {
   Redirect,
   Render,
 } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
 
 import {
   DEFAULT_ORBIT_IMAGE,
@@ -16,6 +17,7 @@ import {
 } from './orbit-type.service.js';
 
 @Controller()
+@ApiExcludeController()
 export class OrbitTypeController {
   constructor(private readonly orbitTypeService: OrbitTypeService) {}
 
@@ -50,7 +52,10 @@ export class OrbitTypeController {
     const draft = await this.orbitTypeService.getDraftOrbitType();
     return {
       title: 'Добавление типа орбиты',
-      draftOrbitType: draft && { ...draft, image: draft.image || DEFAULT_ORBIT_IMAGE },
+      draftOrbitType: draft && {
+        ...draft,
+        image: draft.image || DEFAULT_ORBIT_IMAGE,
+      },
     };
   }
 
@@ -71,15 +76,17 @@ export class OrbitTypeController {
   @Get('orbit-type/grid')
   @Render('orbit-type-grid')
   async getOrbitTypeGrid(@Query('maxHeight') maxHeight?: string) {
-    const parsedHeight = maxHeight === undefined ? MAX_ORBIT_TYPE_HEIGHT : Number(maxHeight);
+    const parsedHeight =
+      maxHeight === undefined ? MAX_ORBIT_TYPE_HEIGHT : Number(maxHeight);
     const selectedHeight = Number.isFinite(parsedHeight)
       ? Math.min(Math.max(parsedHeight, 0), MAX_ORBIT_TYPE_HEIGHT)
       : MAX_ORBIT_TYPE_HEIGHT;
 
     return {
       title: 'Плитка типов орбит',
-      orbitTypes: (await this.orbitTypeService.getPublishedOrbitTypes(selectedHeight))
-        .map((orbitType) => this.orbitTypeService.toView(orbitType)),
+      orbitTypes: (
+        await this.orbitTypeService.getPublishedOrbitTypes(selectedHeight)
+      ).map((orbitType) => this.orbitTypeService.toView(orbitType)),
       selectedHeight,
       maxHeight: MAX_ORBIT_TYPE_HEIGHT,
     };
