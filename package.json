@@ -15,6 +15,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "redis:active-logins": "node scripts/show-active-session-logins.mjs",
     "lint": "oxlint src/ test/",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -1,11 +1,21 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Redis } from 'ioredis';
+import { readFileSync } from 'node:fs';
 
 const SESSION_KEY_PREFIX = 'orbit:session:';
+const ACTIVE_SESSION_LOGINS_LUA = readFileSync(
+  new URL('./lua/active-session-logins.lua', import.meta.url),
+  'utf8',
+);
 
 @Injectable()
-export class OrbitSessionService implements OnModuleDestroy {
+export class OrbitSessionService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(OrbitSessionService.name);
   private readonly redis: Redis;
   readonly ttlSeconds: number;
@@ -28,13 +38,21 @@ export class OrbitSessionService implements OnModuleDestroy {
     });
   }
 
-  async create(sessionId: string, userId: number): Promise<void> {
-    await this.redis.set(
-      `${SESSION_KEY_PREFIX}${sessionId}`,
-      String(userId),
-      'EX',
-      this.ttlSeconds,
-    );
+  async onModuleInit(): Promise<void> {
+    if (this.redis.status === 'wait') await this.redis.connect();
+  }
+
+  async create(sessionId: string, userId: number, login: string): Promise<void> {
+    const sessionKey = `${SESSION_KEY_PREFIX}${sessionId}`;
+    const results = await this.redis
+      .multi()
+      .set(sessionKey, String(userId), 'EX', this.ttlSeconds)
+      .set(`${sessionKey}:login`, login, 'EX', this.ttlSeconds)
+      .exec();
+
+    if (!results) throw new Error('Не удалось сохранить сессию в Redis');
+    const failedCommand = results.find(([error]) => error !== null);
+    if (failedCommand?.[0]) throw failedCommand[0];
   }
 
   async getUserId(sessionId: string): Promise<number | null> {
@@ -46,7 +64,20 @@ export class OrbitSessionService implements OnModuleDestroy {
   }
 
   async destroy(sessionId: string): Promise<void> {
-    await this.redis.del(`${SESSION_KEY_PREFIX}${sessionId}`);
+    const sessionKey = `${SESSION_KEY_PREFIX}${sessionId}`;
+    await this.redis.del(sessionKey, `${sessionKey}:login`);
+  }
+
+  async getActiveLogins(): Promise<string[]> {
+    const result: unknown = await this.redis.eval(
+      ACTIVE_SESSION_LOGINS_LUA,
+      0,
+      `${SESSION_KEY_PREFIX}*:login`,
+      '100',
+    );
+    return Array.isArray(result)
+      ? result.filter((login): login is string => typeof login === 'string')
+      : [];
   }
 
   async onModuleDestroy(): Promise<void> {

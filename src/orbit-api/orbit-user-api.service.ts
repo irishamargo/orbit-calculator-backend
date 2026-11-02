@@ -61,14 +61,8 @@ export class OrbitUserApiService {
       throw new UnauthorizedException('Неверная почта или пароль');
     }
 
-    // Older lab registrations stored a plain password. Upgrade it on successful login.
-    if (!user.password.startsWith('scrypt$')) {
-      user.password = await this.hashPassword(input.password);
-      await this.users.save(user);
-    }
-
     const sessionId = randomBytes(32).toString('base64url');
-    await this.sessions.create(sessionId, user.id);
+    await this.sessions.create(sessionId, user.id, user.email);
 
     return {
       sessionId,
